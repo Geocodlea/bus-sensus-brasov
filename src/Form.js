@@ -11,6 +11,7 @@ import {
   LinearProgress,
 } from "@mui/material";
 import api from "./data";
+import dateNow from "./dateNow";
 
 export default function Form() {
   const [busNumber, setBusNumber] = React.useState("");
@@ -49,6 +50,7 @@ export default function Form() {
       setIsErrorPeople(false);
     }
     console.log(people);
+    console.log(dateNow);
   };
 
   return (
