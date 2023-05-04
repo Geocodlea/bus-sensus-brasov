@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   InputLabel,
@@ -11,29 +12,62 @@ import {
   LinearProgress,
   Typography,
 } from "@mui/material";
-import api from "./data";
 import dateNow from "./dateNow";
 
 export default function Form() {
-  const [busNumber, setBusNumber] = React.useState("");
-  const [busRoute, setBusRoute] = React.useState("");
-  const [station, setStation] = React.useState("");
-  const [people, setPeople] = React.useState("");
-  const [isDisabled, setIsDisabled] = React.useState(true);
-  const [isErrorPeople, setIsErrorPeople] = React.useState(false);
-  const data = api.bus_numbers;
+  const [busNumber, setBusNumber] = useState("");
+  const [busRoute, setBusRoute] = useState("");
+  const [station, setStation] = useState("");
+  const [people, setPeople] = useState("");
+  const [isDisabledRoute, setIsDisabledRoute] = useState(true);
+  const [isDisabledStation, setIsDisabledStation] = useState(true);
+  const [isErrorPeople, setIsErrorPeople] = useState(false);
+  const [data, setData] = useState("");
+  const [error, setError] = useState("");
 
-  if (!data) {
-    return <LinearProgress color="inherit" />;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:3003/busses");
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        setData(data);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (error) {
+    return (
+      <Typography variant="h5" color="red" align="center" m={[3, 5]}>
+        Error: {error}
+      </Typography>
+    );
+  }
+
+  if (!data.length) {
+    return (
+      <Box sx={{ width: 1 }}>
+        <LinearProgress color="inherit" />
+      </Box>
+    );
   }
 
   const handleChangeBusNumber = (event) => {
     setBusNumber(event.target.value);
-    setIsDisabled(false);
+    setIsDisabledRoute(false);
+    setBusRoute("");
+    setStation("");
+    setIsDisabledStation(true);
   };
 
   const handleChangeBusRoute = (event) => {
     setBusRoute(event.target.value);
+    setIsDisabledStation(false);
   };
 
   const handleChangeStation = (event) => {
@@ -45,31 +79,29 @@ export default function Form() {
   };
 
   const handleSubmit = (event) => {
-    if (!people) {
-      setIsErrorPeople(true);
-    } else {
-      setIsErrorPeople(false);
-    }
+    setIsErrorPeople(!people);
 
-    // event.preventDefault();
-    // fetch('/', {
-    //  method: 'post',
-    //  headers: {'Content-Type':'application/json'},
-    //  body: {
-    //   "bus_number": busNumber,
-    //   "bus_route": busRoute,
-    //   "station": station,
-    //   "people": people,
-    //   "date": dateNow
-    //  }
-    // });
+    event.preventDefault();
 
-    console.log(people);
-    console.log(dateNow);
+    fetch("http://localhost:3003/people", {
+      method: "POST",
+      body: JSON.stringify({
+        bus_number: busNumber,
+        bus_route: busRoute,
+        station: station,
+        people: people,
+        date: dateNow,
+      }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    })
+      .then((response) => response.json())
+      .then((json) => console.log(json));
   };
 
   return (
-    <Box sx={{ width: 1, maxWidth: 500 }}>
+    <Box sx={{ maxWidth: 500 }}>
       <Typography variant="h3" gutterBottom align="center" m={[3, 5]}>
         Bus Sensus Brasov
       </Typography>
@@ -77,38 +109,36 @@ export default function Form() {
         Choose the bus number, bus route and station and enter an aproximation
         of the no. of people in the bus, then hit submit.
       </Typography>
-      <Box m={[2, 4]}>
-        <Paper elevation={8} sx={{ mb: 3 }}>
+      <Box m={3} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <Paper elevation={8}>
           <FormControl fullWidth>
             <InputLabel id="bus-number-label">Bus number</InputLabel>
             <Select
               labelId="bus-number-label"
-              id="bus-number"
               value={busNumber}
               label="Bus number"
               onChange={handleChangeBusNumber}
             >
               {data.map((item, i) => (
-                <MenuItem key={i} value={item.bus_number}>
-                  {item.bus_number}
+                <MenuItem key={i} value={item.id}>
+                  {item.id}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Paper>
-        <Paper elevation={8} sx={{ mb: 3 }}>
+        <Paper elevation={8}>
           <FormControl fullWidth>
             <InputLabel id="bus-route-label">Bus route</InputLabel>
             <Select
-              disabled={isDisabled}
+              disabled={isDisabledRoute}
               labelId="bus-route-label"
-              id="bus-route"
               value={busRoute}
               label="Bus route"
               onChange={handleChangeBusRoute}
             >
               {data
-                .filter((item) => item.bus_number === busNumber)[0]
+                .filter((item) => item.id === busNumber)[0]
                 ?.bus_routes.map((item, i) => (
                   <MenuItem key={i} value={item}>
                     {item}
@@ -117,19 +147,22 @@ export default function Form() {
             </Select>
           </FormControl>
         </Paper>
-        <Paper elevation={8} sx={{ mb: 3 }}>
+        <Paper elevation={8}>
           <FormControl fullWidth>
             <InputLabel id="station-label">Station</InputLabel>
             <Select
-              disabled={isDisabled}
+              disabled={isDisabledStation}
               labelId="station-label"
-              id="station"
               value={station}
               label="Station"
               onChange={handleChangeStation}
             >
               {data
-                .filter((item) => item.bus_number === busNumber)[0]
+                .filter(
+                  (item) =>
+                    item.bus_routes[0] === busRoute ||
+                    item.bus_routes[1] === busRoute
+                )[0]
                 ?.stations.map((item, i) => (
                   <MenuItem key={i} value={item}>
                     {item}
@@ -138,11 +171,10 @@ export default function Form() {
             </Select>
           </FormControl>
         </Paper>
-        <Paper elevation={8} sx={{ mb: 3 }}>
+        <Paper elevation={8}>
           <TextField
             error={isErrorPeople}
             required
-            id="people"
             label="No. of people in the bus"
             type="number"
             value={people}
@@ -154,13 +186,15 @@ export default function Form() {
           />
         </Paper>
         <Box align="right">
-          <Paper elevation={8} sx={{ width: 100 }}>
+          <Paper elevation={8} sx={{ width: "fit-content" }}>
             <Button
+              disabled={
+                busNumber && busRoute && station && people ? false : true
+              }
               onClick={handleSubmit}
               variant="outlined"
               size="large"
               color="inherit"
-              fullWidth
             >
               Submit
             </Button>

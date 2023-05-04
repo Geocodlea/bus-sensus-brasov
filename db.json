@@ -1,0 +1,20 @@
+{
+  "busses": [
+    {
+      "id": 1,
+      "bus_routes": ["A-B", "B-A"],
+      "stations": ["A", "B"]
+    },
+    {
+      "id": 2,
+      "bus_routes": ["C-D", "D-C"],
+      "stations": ["C", "D"]
+    },
+    {
+      "id": 3,
+      "bus_routes": ["E-F", "F-E"],
+      "stations": ["E", "F"]
+    }
+  ],
+  "people": []
+}
