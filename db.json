@@ -1,20 +1,96 @@
 {
-  "busses": [
+  "buses": [
     {
       "id": 1,
-      "bus_routes": ["A-B", "B-A"],
-      "stations": ["A", "B"]
+      "busNumber": "1"
     },
     {
       "id": 2,
-      "bus_routes": ["C-D", "D-C"],
-      "stations": ["C", "D"]
+      "busNumber": "2"
     },
     {
       "id": 3,
-      "bus_routes": ["E-F", "F-E"],
-      "stations": ["E", "F"]
+      "busNumber": "2B"
     }
   ],
-  "people": []
+  "routes": [
+    {
+      "id": 1,
+      "busId": 1,
+      "route": "A-B"
+    },
+    {
+      "id": 2,
+      "busId": 1,
+      "route": "B-A"
+    },
+    {
+      "id": 3,
+      "busId": 2,
+      "route": "C-D"
+    },
+    {
+      "id": 4,
+      "busId": 2,
+      "route": "D-C"
+    },
+    {
+      "id": 5,
+      "busId": 3,
+      "route": "E-F"
+    }
+  ],
+  "stations": [
+    {
+      "id": 1,
+      "routeId": 1,
+      "station": "A"
+    },
+    {
+      "id": 2,
+      "routeId": 1,
+      "station": "B"
+    },
+    {
+      "id": 3,
+      "routeId": 2,
+      "station": "B"
+    },
+    {
+      "id": 4,
+      "routeId": 2,
+      "station": "A"
+    },
+    {
+      "id": 5,
+      "routeId": 3,
+      "station": "C"
+    },
+    {
+      "id": 6,
+      "routeId": 3,
+      "station": "D"
+    },
+    {
+      "id": 7,
+      "routeId": 4,
+      "station": "D"
+    },
+    {
+      "id": 8,
+      "routeId": 4,
+      "station": "C"
+    },
+    {
+      "id": 9,
+      "routeId": 5,
+      "station": "E"
+    },
+    {
+      "id": 10,
+      "routeId": 5,
+      "station": "F"
+    }
+  ],
+  "reports": []
 }

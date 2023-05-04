@@ -16,29 +16,31 @@ import dateNow from "./dateNow";
 
 export default function Form() {
   const [busNumber, setBusNumber] = useState("");
-  const [busRoute, setBusRoute] = useState("");
+  const [route, setRoute] = useState("");
   const [station, setStation] = useState("");
   const [people, setPeople] = useState("");
   const [isDisabledRoute, setIsDisabledRoute] = useState(true);
   const [isDisabledStation, setIsDisabledStation] = useState(true);
   const [isErrorPeople, setIsErrorPeople] = useState(false);
-  const [data, setData] = useState("");
+  const [buses, setBuses] = useState([]);
+  const [routes, setRoutes] = useState([]);
+  const [stations, setStations] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBuses = async () => {
       try {
-        const response = await fetch("http://localhost:3003/busses");
+        const response = await fetch("http://localhost:3003/buses");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        const data = await response.json();
-        setData(data);
+        const buses = await response.json();
+        setBuses(buses);
       } catch (error) {
         setError(error.message);
       }
     };
-    fetchData();
+    fetchBuses();
   }, []);
 
   if (error) {
@@ -49,7 +51,7 @@ export default function Form() {
     );
   }
 
-  if (!data.length) {
+  if (!buses.length) {
     return (
       <Box sx={{ width: 1 }}>
         <LinearProgress color="inherit" />
@@ -57,17 +59,44 @@ export default function Form() {
     );
   }
 
-  const handleChangeBusNumber = (event) => {
+  const handleChangeBusNumber = async (event) => {
     setBusNumber(event.target.value);
+    setRoute("");
     setIsDisabledRoute(false);
-    setBusRoute("");
     setStation("");
     setIsDisabledStation(true);
+
+    try {
+      const fetchRoutes = await fetch(
+        `http://localhost:3003/buses/${event.target.value}/routes`
+      );
+      if (!fetchRoutes.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const routes = await fetchRoutes.json();
+      setRoutes(routes);
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
-  const handleChangeBusRoute = (event) => {
-    setBusRoute(event.target.value);
+  const handleChangeRoute = async (event) => {
+    setRoute(event.target.value);
+    setStation("");
     setIsDisabledStation(false);
+
+    try {
+      const fetchStations = await fetch(
+        `http://localhost:3003/routes/${event.target.value}/stations`
+      );
+      if (!fetchStations.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const stations = await fetchStations.json();
+      setStations(stations);
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   const handleChangeStation = (event) => {
@@ -83,11 +112,11 @@ export default function Form() {
 
     event.preventDefault();
 
-    fetch("http://localhost:3003/people", {
+    fetch("http://localhost:3003/reports", {
       method: "POST",
       body: JSON.stringify({
         bus_number: busNumber,
-        bus_route: busRoute,
+        bus_route: route,
         station: station,
         people: people,
         date: dateNow,
@@ -119,9 +148,9 @@ export default function Form() {
               label="Bus number"
               onChange={handleChangeBusNumber}
             >
-              {data.map((item, i) => (
-                <MenuItem key={i} value={item.id}>
-                  {item.id}
+              {buses.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.busNumber}
                 </MenuItem>
               ))}
             </Select>
@@ -133,15 +162,14 @@ export default function Form() {
             <Select
               disabled={isDisabledRoute}
               labelId="bus-route-label"
-              value={busRoute}
+              value={route}
               label="Bus route"
-              onChange={handleChangeBusRoute}
+              onChange={handleChangeRoute}
             >
-              {data
-                .filter((item) => item.id === busNumber)[0]
-                ?.bus_routes.map((item, i) => (
-                  <MenuItem key={i} value={item}>
-                    {item}
+              {routes &&
+                routes.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.route}
                   </MenuItem>
                 ))}
             </Select>
@@ -157,15 +185,10 @@ export default function Form() {
               label="Station"
               onChange={handleChangeStation}
             >
-              {data
-                .filter(
-                  (item) =>
-                    item.bus_routes[0] === busRoute ||
-                    item.bus_routes[1] === busRoute
-                )[0]
-                ?.stations.map((item, i) => (
-                  <MenuItem key={i} value={item}>
-                    {item}
+              {stations &&
+                stations.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.station}
                   </MenuItem>
                 ))}
             </Select>
@@ -188,9 +211,7 @@ export default function Form() {
         <Box align="right">
           <Paper elevation={8} sx={{ width: "fit-content" }}>
             <Button
-              disabled={
-                busNumber && busRoute && station && people ? false : true
-              }
+              disabled={busNumber && route && station && people ? false : true}
               onClick={handleSubmit}
               variant="outlined"
               size="large"
