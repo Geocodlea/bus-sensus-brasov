@@ -11,6 +11,7 @@ import {
   MenuItem,
   LinearProgress,
   Typography,
+  FormHelperText,
 } from "@mui/material";
 import dateNow from "./dateNow";
 
@@ -104,12 +105,21 @@ export default function Form() {
   };
 
   const handleChangePeople = (event) => {
-    setPeople(event.target.value);
+    const inputValue = event.target.value;
+    if (
+      inputValue === "" ||
+      inputValue < 0 ||
+      inputValue > 100 ||
+      !Number.isInteger(Number(inputValue))
+    ) {
+      setIsErrorPeople(true);
+    } else {
+      setIsErrorPeople(false);
+    }
+    setPeople(inputValue);
   };
 
   const handleSubmit = (event) => {
-    setIsErrorPeople(!people);
-
     event.preventDefault();
 
     fetch("http://localhost:3003/reports", {
@@ -206,12 +216,26 @@ export default function Form() {
             }}
             onChange={handleChangePeople}
             fullWidth
+            inputProps={{
+              min: 0,
+              max: 100,
+              step: "1",
+            }}
           />
+          {isErrorPeople && (
+            <FormHelperText error>
+              Please enter a number between 0 and 100.
+            </FormHelperText>
+          )}
         </Paper>
         <Box align="right">
           <Paper elevation={8} sx={{ width: "fit-content" }}>
             <Button
-              disabled={busNumber && route && station && people ? false : true}
+              disabled={
+                busNumber && route && station && people && !isErrorPeople
+                  ? false
+                  : true
+              }
               onClick={handleSubmit}
               variant="outlined"
               size="large"
