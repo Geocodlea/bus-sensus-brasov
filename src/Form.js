@@ -31,7 +31,7 @@ export default function Form() {
   useEffect(() => {
     const fetchBuses = async () => {
       try {
-        const response = await fetch("http://localhost:3003/buses");
+        const response = await fetch("http://localhost:8080/bussensus/buses");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
@@ -69,7 +69,7 @@ export default function Form() {
 
     try {
       const fetchRoutes = await fetch(
-        `http://localhost:3003/buses/${event.target.value}/routes`
+        `http://localhost:8080/bussensus/buses/${event.target.value}/routes`
       );
       if (!fetchRoutes.ok) {
         throw new Error("Network response was not ok");
@@ -88,7 +88,7 @@ export default function Form() {
 
     try {
       const fetchStations = await fetch(
-        `http://localhost:3003/routes/${event.target.value}/stations`
+        `http://localhost:8080/bussensus/buses/${busNumber}/routes/${event.target.value}/stations`
       );
       if (!fetchStations.ok) {
         throw new Error("Network response was not ok");
@@ -122,13 +122,13 @@ export default function Form() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    fetch("http://localhost:3003/reports", {
+    fetch("http://localhost:8080/bussensus/reports", {
       method: "POST",
       body: JSON.stringify({
-        bus_number: busNumber,
-        bus_route: route,
-        station: station,
-        people: people,
+        busId: busNumber,
+        routeId: route,
+        stationId: station,
+        noOfPassengers: people,
         date: dateNow,
       }),
       headers: {
@@ -159,8 +159,8 @@ export default function Form() {
               onChange={handleChangeBusNumber}
             >
               {buses.map((item) => (
-                <MenuItem key={item.id} value={item.id}>
-                  {item.busNumber}
+                <MenuItem key={item.busId} value={item.busId}>
+                  {item.name}
                 </MenuItem>
               ))}
             </Select>
@@ -178,8 +178,8 @@ export default function Form() {
             >
               {routes &&
                 routes.map((item) => (
-                  <MenuItem key={item.id} value={item.id}>
-                    {item.route}
+                  <MenuItem key={item.routeId} value={item.routeId}>
+                    {item.name}
                   </MenuItem>
                 ))}
             </Select>
@@ -197,8 +197,8 @@ export default function Form() {
             >
               {stations &&
                 stations.map((item) => (
-                  <MenuItem key={item.id} value={item.id}>
-                    {item.station}
+                  <MenuItem key={item.stationId} value={item.stationId}>
+                    {item.name}
                   </MenuItem>
                 ))}
             </Select>
