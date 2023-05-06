@@ -27,6 +27,7 @@ export default function Form() {
   const [routes, setRoutes] = useState([]);
   const [stations, setStations] = useState([]);
   const [error, setError] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchBuses = async () => {
@@ -46,7 +47,7 @@ export default function Form() {
 
   if (error) {
     return (
-      <Typography variant="h5" color="red" align="center" m={[3, 5]}>
+      <Typography variant="h5" color="#d32f2f" align="center" m={[3, 5]}>
         Error: {error}
       </Typography>
     );
@@ -66,6 +67,7 @@ export default function Form() {
     setIsDisabledRoute(false);
     setStation("");
     setIsDisabledStation(true);
+    setIsSubmitted(false);
 
     try {
       const fetchRoutes = await fetch(
@@ -119,10 +121,10 @@ export default function Form() {
     setPeople(inputValue);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    fetch("http://localhost:8080/bussensus/reports", {
+    await fetch("http://localhost:8080/bussensus/reports", {
       method: "POST",
       body: JSON.stringify({
         busId: busNumber,
@@ -134,9 +136,14 @@ export default function Form() {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
-    })
-      .then((response) => response.json())
-      .then((json) => console.log(json));
+    });
+
+    setIsSubmitted(true);
+    setBusNumber("");
+    setRoute("");
+    setIsDisabledRoute(true);
+    setStation("");
+    setIsDisabledStation(true);
   };
 
   return (
@@ -222,12 +229,12 @@ export default function Form() {
               step: "1",
             }}
           />
-          {isErrorPeople && (
-            <FormHelperText error>
-              Please enter a number between 0 and 100.
-            </FormHelperText>
-          )}
         </Paper>
+        {isErrorPeople && (
+          <FormHelperText error>
+            Please enter a number between 0 and 100.
+          </FormHelperText>
+        )}
         <Box align="right">
           <Paper elevation={8} sx={{ width: "fit-content" }}>
             <Button
@@ -244,6 +251,14 @@ export default function Form() {
               Submit
             </Button>
           </Paper>
+          {isSubmitted && (
+            <Typography
+              variant="body1"
+              sx={{ textAlign: "center", color: "#2e7d32" }}
+            >
+              Form sent successfully
+            </Typography>
+          )}
         </Box>
       </Box>
     </Box>
