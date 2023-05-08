@@ -124,33 +124,38 @@ export default function Form() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    await fetch("http://localhost:8080/bussensus/reports", {
-      method: "POST",
-      body: JSON.stringify({
-        busId: busNumber,
-        routeId: route,
-        stationId: station,
-        noOfPassengers: people,
-        date: dateNow,
-      }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    });
+    try {
+      const response = await fetch("http://localhost:8080/bussensus/reports", {
+        method: "POST",
+        body: JSON.stringify({
+          busId: busNumber,
+          routeId: route,
+          stationId: station,
+          noOfPassengers: people,
+          date: dateNow,
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      });
 
-    setIsSubmitted(true);
-    setBusNumber("");
-    setRoute("");
-    setIsDisabledRoute(true);
-    setStation("");
-    setIsDisabledStation(true);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      setIsSubmitted(true);
+      setBusNumber("");
+      setRoute("");
+      setIsDisabledRoute(true);
+      setStation("");
+      setIsDisabledStation(true);
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   return (
-    <Box sx={{ maxWidth: 500 }}>
-      <Typography variant="h3" gutterBottom align="center" m={[3, 5]}>
-        Bus Sensus Brasov
-      </Typography>
+    <>
       <Typography variant="body1" align="justify" m={[2, 4]}>
         Choose the bus number, bus route and station and enter an aproximation
         of the no. of people in the bus, then hit submit.
@@ -261,6 +266,6 @@ export default function Form() {
           )}
         </Box>
       </Box>
-    </Box>
+    </>
   );
 }
