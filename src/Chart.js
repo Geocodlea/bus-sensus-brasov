@@ -45,14 +45,14 @@ const DataChart = ({ report, busNumber, route, station }) => {
 
     // Create the chart
     const chart = new Chart(chartRef.current, {
-      type: "line",
+      type: "bar",
       data: {
         labels: Array.from({ length: 24 }, (_, i) => `${i}`),
         datasets: [
           {
             label: "Average No. of Passengers",
             data: hourlyAverages,
-            backgroundColor: "rgba(54, 162, 235, 0.2)",
+            backgroundColor: "rgba(54, 162, 235, 1)",
             borderColor: "rgba(54, 162, 235, 1)",
             borderWidth: 1,
           },

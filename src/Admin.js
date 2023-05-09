@@ -29,7 +29,38 @@ export default function Admin() {
           throw new Error("Network response was not ok");
         }
         const report = await response.json();
-        setReport(report);
+
+        const fetchBuses = await fetch("http://localhost:8080/bussensus/buses");
+        const buses = await fetchBuses.json();
+
+        const fetchRoutes = await fetch(
+          `http://localhost:8080/bussensus/routes`
+        );
+        const routes = await fetchRoutes.json();
+
+        const fetchStations = await fetch(
+          `http://localhost:8080/bussensus/stations`
+        );
+        const stations = await fetchStations.json();
+
+        const reportWithNames = report.map((report) => {
+          const bus = buses.find((bus) => bus.busId === report.busId);
+          const route = routes.find(
+            (route) => route.routeId === report.routeId
+          );
+          const station = stations.find(
+            (station) => station.stationId === report.stationId
+          );
+
+          return {
+            ...report,
+            busName: bus ? bus.name : "",
+            routeName: route ? route.name : "",
+            stationName: station ? station.name : "",
+          };
+        });
+
+        setReport(reportWithNames);
       } catch (error) {
         setError(error.message);
       }
@@ -104,7 +135,7 @@ export default function Admin() {
                 }, {})
               ).map((item) => (
                 <MenuItem key={item.reportId} value={item.busId}>
-                  {item.busId}
+                  {item.busName}
                 </MenuItem>
               ))}
             </Select>
@@ -131,7 +162,7 @@ export default function Admin() {
                   }, {})
               ).map((item) => (
                 <MenuItem key={item.reportId} value={item.routeId}>
-                  {item.routeId}
+                  {item.routeName}
                 </MenuItem>
               ))}
             </Select>
@@ -158,7 +189,7 @@ export default function Admin() {
                   }, {})
               ).map((item) => (
                 <MenuItem key={item.reportId} value={item.stationId}>
-                  {item.stationId}
+                  {item.stationName}
                 </MenuItem>
               ))}
             </Select>
