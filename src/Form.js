@@ -158,9 +158,18 @@ export default function Form() {
     <>
       <Typography variant="body1" align="justify" m={[2, 4]}>
         Choose the bus number, bus route and station and enter an aproximation
-        of the no. of people in the bus, then hit submit.
+        of the no. of passengers in the bus, then hit submit.
       </Typography>
-      <Box m={3} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box
+        m={3}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          maxWidth: 400,
+          margin: "auto",
+        }}
+      >
         <Paper elevation={8}>
           <FormControl fullWidth>
             <InputLabel id="bus-number-label">Bus number</InputLabel>
@@ -220,7 +229,7 @@ export default function Form() {
           <TextField
             error={isErrorPeople}
             required
-            label="No. of people in the bus"
+            label="No. of passengers in the bus"
             type="number"
             value={people}
             InputLabelProps={{
@@ -241,7 +250,10 @@ export default function Form() {
           </FormHelperText>
         )}
         <Box align="right">
-          <Paper elevation={8} sx={{ width: "fit-content" }}>
+          <Paper
+            elevation={8}
+            sx={{ width: "fit-content", marginBottom: "20px" }}
+          >
             <Button
               disabled={
                 busNumber && route && station && people && !isErrorPeople

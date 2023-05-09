@@ -75,9 +75,17 @@ export default function Admin() {
     <>
       <Typography variant="body1" align="justify" m={[2, 4]}>
         Choose the bus number, bus route and station to get an average of the
-        no. of people in that bus by hours.
+        no. of passengers in that bus on that station by hours.
       </Typography>
-      <Box m={3} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          maxWidth: 400,
+          margin: "0 auto 30px auto",
+        }}
+      >
         <Paper elevation={8}>
           <FormControl fullWidth>
             <InputLabel id="bus-number-label">Bus number</InputLabel>

@@ -12,7 +12,7 @@ function App() {
           justifyContent: "center",
         }}
       >
-        <Box sx={{ maxWidth: 500, width: 1 }}>
+        <Box sx={{ maxWidth: 700, width: 1 }}>
           <Typography variant="h3" gutterBottom align="center" m={[3, 5]}>
             Bus Sensus Brasov
           </Typography>
