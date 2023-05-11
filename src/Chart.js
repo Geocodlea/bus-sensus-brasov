@@ -1,23 +1,18 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
 
-const DataChart = ({ report, busNumber, route, station }) => {
+const DataChart = ({ reports, busNumber, route, station }) => {
   const chartRef = useRef(null);
-  const [data, setData] = useState([]);
 
   useEffect(() => {
-    setData(
-      report.filter((item) => {
-        return (
-          item.busId === busNumber &&
-          item.routeId === route &&
-          item.stationId === station
-        );
-      })
-    );
-  }, [report, busNumber, route, station]);
+    const data = reports.filter((item) => {
+      return (
+        item.busId === busNumber &&
+        item.routeId === route &&
+        item.stationId === station
+      );
+    });
 
-  useEffect(() => {
     // Group the data by the hour
     const hourlyData = data.reduce((acc, obj) => {
       const date = new Date(obj.dateTime);
@@ -35,8 +30,7 @@ const DataChart = ({ report, busNumber, route, station }) => {
 
     // Calculate the average noOfPassengers for each hour
     const hourlyAverages = Array.from({ length: 24 }, (_, i) => {
-      const hour = i;
-      const { noOfPassengers, count } = hourlyData[hour] || {
+      const { noOfPassengers, count } = hourlyData[i] || {
         noOfPassengers: 0,
         count: 0,
       };
@@ -80,7 +74,7 @@ const DataChart = ({ report, busNumber, route, station }) => {
     return () => {
       chart.destroy();
     };
-  }, [data]);
+  }, [reports, busNumber, route, station]);
 
   return <canvas ref={chartRef} />;
 };

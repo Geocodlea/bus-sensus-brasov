@@ -13,29 +13,28 @@ import {
 import Chart from "./Chart";
 
 export default function Admin() {
-  const [report, setReport] = useState([]);
+  const [reports, setReports] = useState([]);
   const [busNumber, setBusNumber] = useState("");
   const [route, setRoute] = useState("");
   const [station, setStation] = useState("");
-  const [isDisabledRoute, setIsDisabledRoute] = useState(true);
-  const [isDisabledStation, setIsDisabledStation] = useState(true);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchReport = async () => {
+    const fetchReports = async () => {
       try {
         const response = await fetch("http://localhost:8080/bussensus/reports");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        const report = await response.json();
-
-        setReport(report);
+        const reports = await response.json();
+        setReports(reports);
+        setLoading(false);
       } catch (error) {
         setError(error.message);
       }
     };
-    fetchReport();
+    fetchReports();
   }, []);
 
   if (error) {
@@ -46,7 +45,7 @@ export default function Admin() {
     );
   }
 
-  if (!report.length) {
+  if (loading) {
     return (
       <Box sx={{ width: 1 }}>
         <LinearProgress color="inherit" />
@@ -57,15 +56,12 @@ export default function Admin() {
   const handleChangeBusNumber = async (event) => {
     setBusNumber(event.target.value);
     setRoute("");
-    setIsDisabledRoute(false);
     setStation("");
-    setIsDisabledStation(true);
   };
 
   const handleChangeRoute = async (event) => {
     setRoute(event.target.value);
     setStation("");
-    setIsDisabledStation(false);
   };
 
   const handleChangeStation = (event) => {
@@ -97,7 +93,7 @@ export default function Admin() {
               onChange={handleChangeBusNumber}
             >
               {Object.values(
-                report.reduce((acc, report) => {
+                reports.reduce((acc, report) => {
                   if (!acc[report.busId]) {
                     acc[report.busId] = report;
                   }
@@ -115,14 +111,14 @@ export default function Admin() {
           <FormControl fullWidth>
             <InputLabel id="bus-route-label">Bus route</InputLabel>
             <Select
-              disabled={isDisabledRoute}
+              disabled={!busNumber}
               labelId="bus-route-label"
               value={route}
               label="Bus route"
               onChange={handleChangeRoute}
             >
               {Object.values(
-                report
+                reports
                   .filter((item) => item.busId === busNumber)
                   .reduce((acc, report) => {
                     if (!acc[report.routeId]) {
@@ -142,14 +138,14 @@ export default function Admin() {
           <FormControl fullWidth>
             <InputLabel id="station-label">Station</InputLabel>
             <Select
-              disabled={isDisabledStation}
+              disabled={!busNumber || !route}
               labelId="station-label"
               value={station}
               label="Station"
               onChange={handleChangeStation}
             >
               {Object.values(
-                report
+                reports
                   .filter((item) => item.routeId === route)
                   .reduce((acc, report) => {
                     if (!acc[report.stationId]) {
@@ -168,7 +164,7 @@ export default function Admin() {
       </Box>
       {busNumber && route && station && (
         <Chart
-          report={report}
+          reports={reports}
           busNumber={busNumber}
           route={route}
           station={station}

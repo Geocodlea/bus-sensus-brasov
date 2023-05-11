@@ -20,14 +20,13 @@ export default function Form() {
   const [route, setRoute] = useState("");
   const [station, setStation] = useState("");
   const [people, setPeople] = useState("");
-  const [isDisabledRoute, setIsDisabledRoute] = useState(true);
-  const [isDisabledStation, setIsDisabledStation] = useState(true);
   const [isErrorPeople, setIsErrorPeople] = useState(false);
   const [buses, setBuses] = useState([]);
   const [routes, setRoutes] = useState([]);
   const [stations, setStations] = useState([]);
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBuses = async () => {
@@ -38,6 +37,7 @@ export default function Form() {
         }
         const buses = await response.json();
         setBuses(buses);
+        setLoading(false);
       } catch (error) {
         setError(error.message);
       }
@@ -53,7 +53,7 @@ export default function Form() {
     );
   }
 
-  if (!buses.length) {
+  if (loading) {
     return (
       <Box sx={{ width: 1 }}>
         <LinearProgress color="inherit" />
@@ -64,9 +64,9 @@ export default function Form() {
   const handleChangeBusNumber = async (event) => {
     setBusNumber(event.target.value);
     setRoute("");
-    setIsDisabledRoute(false);
+
     setStation("");
-    setIsDisabledStation(true);
+
     setIsSubmitted(false);
 
     try {
@@ -86,7 +86,6 @@ export default function Form() {
   const handleChangeRoute = async (event) => {
     setRoute(event.target.value);
     setStation("");
-    setIsDisabledStation(false);
 
     try {
       const fetchStations = await fetch(
@@ -108,22 +107,19 @@ export default function Form() {
 
   const handleChangePeople = (event) => {
     const inputValue = event.target.value;
-    if (
-      inputValue === "" ||
-      inputValue < 0 ||
-      inputValue > 100 ||
-      !Number.isInteger(Number(inputValue))
-    ) {
-      setIsErrorPeople(true);
-    } else {
-      setIsErrorPeople(false);
-    }
+    const numberValue = parseInt(inputValue);
+
+    setIsErrorPeople(
+      !inputValue ||
+        numberValue < 0 ||
+        numberValue > 100 ||
+        !Number.isInteger(Number(inputValue))
+    );
+
     setPeople(inputValue);
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-
     try {
       const response = await fetch("http://localhost:8080/bussensus/reports", {
         method: "POST",
@@ -146,9 +142,8 @@ export default function Form() {
       setIsSubmitted(true);
       setBusNumber("");
       setRoute("");
-      setIsDisabledRoute(true);
+
       setStation("");
-      setIsDisabledStation(true);
     } catch (error) {
       setError(error.message);
     }
@@ -191,7 +186,7 @@ export default function Form() {
           <FormControl fullWidth>
             <InputLabel id="bus-route-label">Bus route</InputLabel>
             <Select
-              disabled={isDisabledRoute}
+              disabled={!busNumber}
               labelId="bus-route-label"
               value={route}
               label="Bus route"
@@ -210,7 +205,7 @@ export default function Form() {
           <FormControl fullWidth>
             <InputLabel id="station-label">Station</InputLabel>
             <Select
-              disabled={isDisabledStation}
+              disabled={!busNumber || !route}
               labelId="station-label"
               value={station}
               label="Station"
@@ -255,11 +250,7 @@ export default function Form() {
             sx={{ width: "fit-content", marginBottom: "20px" }}
           >
             <Button
-              disabled={
-                busNumber && route && station && people && !isErrorPeople
-                  ? false
-                  : true
-              }
+              disabled={!station || !people || isErrorPeople}
               onClick={handleSubmit}
               variant="outlined"
               size="large"
