@@ -30,37 +30,7 @@ export default function Admin() {
         }
         const report = await response.json();
 
-        const fetchBuses = await fetch("http://localhost:8080/bussensus/buses");
-        const buses = await fetchBuses.json();
-
-        const fetchRoutes = await fetch(
-          `http://localhost:8080/bussensus/routes`
-        );
-        const routes = await fetchRoutes.json();
-
-        const fetchStations = await fetch(
-          `http://localhost:8080/bussensus/stations`
-        );
-        const stations = await fetchStations.json();
-
-        const reportWithNames = report.map((report) => {
-          const bus = buses.find((bus) => bus.busId === report.busId);
-          const route = routes.find(
-            (route) => route.routeId === report.routeId
-          );
-          const station = stations.find(
-            (station) => station.stationId === report.stationId
-          );
-
-          return {
-            ...report,
-            busName: bus ? bus.name : "",
-            routeName: route ? route.name : "",
-            stationName: station ? station.name : "",
-          };
-        });
-
-        setReport(reportWithNames);
+        setReport(report);
       } catch (error) {
         setError(error.message);
       }
