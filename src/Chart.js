@@ -5,8 +5,16 @@ const DataChart = ({ reports, busNumber, route, station }) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
+    const data = reports.filter((item) => {
+      return (
+        item.busId === busNumber &&
+        item.routeId === route &&
+        item.stationId === station
+      );
+    });
+
     // Group the data by the hour
-    const hourlyData = reports.reduce((acc, obj) => {
+    const hourlyData = data.reduce((acc, obj) => {
       const date = new Date(obj.dateTime);
       const hour = date.getHours();
 
